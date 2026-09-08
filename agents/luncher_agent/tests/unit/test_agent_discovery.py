@@ -49,12 +49,12 @@ def test_format_agent_runtime_url_custom_app_name() -> None:
 def test_discover_sub_agent_via_engine_id_env(monkeypatch) -> None:
     monkeypatch.setenv("GOOGLE_CLOUD_PROJECT_ID", "test-project")
     monkeypatch.setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-    monkeypatch.setenv("STRATEGY_AGENT_ENGINE_ID", "6460173422172307456")
+    monkeypatch.setenv("CATERING_AGENT_ENGINE_ID", "6460173422172307456")
 
     agent = discover_sub_agent(
-        agent_name="strategy_agent",
+        agent_name="cater_agent",
         default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
-        description="Strategy analyst",
+        description="Catering coordinator",
     )
 
     expected_url = (
@@ -68,13 +68,13 @@ def test_discover_sub_agent_via_engine_id_env(monkeypatch) -> None:
 def test_discover_sub_agent_via_short_alias_engine_id(monkeypatch) -> None:
     monkeypatch.setenv("GOOGLE_CLOUD_PROJECT_ID", "test-project")
     monkeypatch.setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-    monkeypatch.delenv("STRATEGY_AGENT_ENGINE_ID", raising=False)
-    monkeypatch.setenv("STRAT_AGENT_ENGINE_ID", "999888777")
+    monkeypatch.delenv("CATERING_AGENT_ENGINE_ID", raising=False)
+    monkeypatch.setenv("CATER_AGENT_ENGINE_ID", "999888777")
 
     agent = discover_sub_agent(
-        agent_name="strategy_agent",
+        agent_name="cater_agent",
         default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
-        description="Strategy analyst",
+        description="Catering coordinator",
     )
 
     assert "reasoningEngines/999888777" in str(agent._agent_card_source)
@@ -82,12 +82,12 @@ def test_discover_sub_agent_via_short_alias_engine_id(monkeypatch) -> None:
 
 def test_discover_sub_agent_via_runtime_id_resource(monkeypatch) -> None:
     resource = "projects/999/locations/europe-west1/reasoningEngines/888"
-    monkeypatch.setenv("SCHEDULING_AGENT_RUNTIME_ID", resource)
+    monkeypatch.setenv("CATERING_AGENT_RUNTIME_ID", resource)
 
     agent = discover_sub_agent(
-        agent_name="scheduling_agent",
-        default_local_url="http://localhost:8082/a2a/app/.well-known/agent-card.json",
-        description="Scheduling coordinator",
+        agent_name="cater_agent",
+        default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
+        description="Catering coordinator",
     )
 
     assert agent._agent_card_source == (
@@ -97,16 +97,16 @@ def test_discover_sub_agent_via_runtime_id_resource(monkeypatch) -> None:
 
 
 def test_discover_sub_agent_via_direct_url_env(monkeypatch) -> None:
-    custom_url = "https://custom-sched.run.app/a2a/app/.well-known/agent-card.json"
-    monkeypatch.delenv("SCHEDULING_AGENT_ENGINE_ID", raising=False)
-    monkeypatch.delenv("SCHEDULING_AGENT_RUNTIME_ID", raising=False)
-    monkeypatch.delenv("SCHED_AGENT_ENGINE_ID", raising=False)
-    monkeypatch.setenv("SCHEDULING_AGENT_URL", custom_url)
+    custom_url = "https://custom-cater.run.app/a2a/app/.well-known/agent-card.json"
+    monkeypatch.delenv("CATERING_AGENT_ENGINE_ID", raising=False)
+    monkeypatch.delenv("CATERING_AGENT_RUNTIME_ID", raising=False)
+    monkeypatch.delenv("CATER_AGENT_ENGINE_ID", raising=False)
+    monkeypatch.setenv("CATER_AGENT_URL", custom_url)
 
     agent = discover_sub_agent(
-        agent_name="scheduling_agent",
-        default_local_url="http://localhost:8082/a2a/app/.well-known/agent-card.json",
-        description="Scheduling coordinator",
+        agent_name="cater_agent",
+        default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
+        description="Catering coordinator",
     )
 
     assert agent._agent_card_source == custom_url
@@ -114,21 +114,21 @@ def test_discover_sub_agent_via_direct_url_env(monkeypatch) -> None:
 
 def test_discover_sub_agent_local_fallback(monkeypatch) -> None:
     for var in [
-        "STRATEGY_AGENT_ENGINE_ID",
-        "STRATEGY_AGENT_RUNTIME_ID",
-        "STRAT_AGENT_ENGINE_ID",
-        "STRAT_ENGINE_ID",
-        "STRATEGY_AGENT_URL",
-        "STRAT_AGENT_URL",
-        "STRAT_URL",
+        "CATERING_AGENT_ENGINE_ID",
+        "CATERING_AGENT_RUNTIME_ID",
+        "CATER_AGENT_ENGINE_ID",
+        "CATER_ENGINE_ID",
+        "CATERING_AGENT_URL",
+        "CATER_AGENT_URL",
+        "CATER_URL",
         "GOOGLE_CLOUD_AGENT_ENGINE_ID",
     ]:
         monkeypatch.delenv(var, raising=False)
 
     agent = discover_sub_agent(
-        agent_name="strategy_agent",
+        agent_name="cater_agent",
         default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
-        description="Strategy analyst",
+        description="Catering coordinator",
     )
 
     assert agent._agent_card_source == "http://localhost:8081/a2a/app/.well-known/agent-card.json"
@@ -136,13 +136,13 @@ def test_discover_sub_agent_local_fallback(monkeypatch) -> None:
 
 def test_discover_sub_agent_warns_when_deployed_in_cloud_without_config(monkeypatch, caplog) -> None:
     for var in [
-        "STRATEGY_AGENT_ENGINE_ID",
-        "STRATEGY_AGENT_RUNTIME_ID",
-        "STRAT_AGENT_ENGINE_ID",
-        "STRAT_ENGINE_ID",
-        "STRATEGY_AGENT_URL",
-        "STRAT_AGENT_URL",
-        "STRAT_URL",
+        "CATERING_AGENT_ENGINE_ID",
+        "CATERING_AGENT_RUNTIME_ID",
+        "CATER_AGENT_ENGINE_ID",
+        "CATER_ENGINE_ID",
+        "CATERING_AGENT_URL",
+        "CATER_AGENT_URL",
+        "CATER_URL",
     ]:
         monkeypatch.delenv(var, raising=False)
 
@@ -150,9 +150,9 @@ def test_discover_sub_agent_warns_when_deployed_in_cloud_without_config(monkeypa
 
     with caplog.at_level(logging.WARNING):
         agent = discover_sub_agent(
-            agent_name="strategy_agent",
+            agent_name="cater_agent",
             default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
-            description="Strategy analyst",
+            description="Catering coordinator",
         )
 
     assert agent._agent_card_source == "http://localhost:8081/a2a/app/.well-known/agent-card.json"

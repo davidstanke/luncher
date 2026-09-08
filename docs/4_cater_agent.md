@@ -67,16 +67,14 @@ uv --directory agents/cater_agent run agents-cli deploy \
   --agent-identity \
   --update-env-vars "$BASE_ENV,$AGENT_SETTINGS_ENV,BIGQUERY_LOCATION=${BIGQUERY_LOCATION}"
 
-# 2. Extract engine IDs and redeploy luncher_agent with all 3 sub-agents
-STRAT_ENGINE_ID=$(jq -r '.remote_agent_runtime_id | split("/") | last' agents/strat_agent/deployment_metadata.json 2>/dev/null || echo "")
-SCHED_ENGINE_ID=$(jq -r '.remote_agent_runtime_id | split("/") | last' agents/sched_agent/deployment_metadata.json 2>/dev/null || echo "")
+# 2. Extract engine ID and redeploy luncher_agent with remote A2A cater_agent
 CATER_ENGINE_ID=$(jq -r '.remote_agent_runtime_id | split("/") | last' agents/cater_agent/deployment_metadata.json 2>/dev/null || echo "")
 
 uv --directory agents/luncher_agent run agents-cli deploy \
   --project "$GOOGLE_CLOUD_PROJECT_ID" \
   --region "$GOOGLE_CLOUD_LOCATION" \
   --agent-identity \
-  --update-env-vars "$BASE_ENV,$AGENT_SETTINGS_ENV${STRAT_ENGINE_ID:+,STRATEGY_AGENT_ENGINE_ID=$STRAT_ENGINE_ID}${SCHED_ENGINE_ID:+,SCHEDULING_AGENT_ENGINE_ID=$SCHED_ENGINE_ID}${CATER_ENGINE_ID:+,CATERING_AGENT_ENGINE_ID=$CATER_ENGINE_ID}"
+  --update-env-vars "$BASE_ENV,$AGENT_SETTINGS_ENV${STRATEGY_DOCS_BUCKET:+,STRATEGY_DOCS_BUCKET=$STRATEGY_DOCS_BUCKET}${CATER_ENGINE_ID:+,CATERING_AGENT_ENGINE_ID=$CATER_ENGINE_ID}"
 ```
 
 ### 2.2. Validate deployed agent

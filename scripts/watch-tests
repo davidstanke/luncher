@@ -2,7 +2,7 @@
 # Re-run an agent's unit tests whenever its source or tests change.
 #
 #   ./scripts/watch-tests                 # luncher_agent (default)
-#   ./scripts/watch-tests sched_agent
+#   ./scripts/watch-tests cater_agent
 #   ./scripts/watch-tests luncher_agent tests/unit/test_proposal_builder.py
 #
 # Uses watchfiles' CLI, which is a declared dependency of each agent, so there is

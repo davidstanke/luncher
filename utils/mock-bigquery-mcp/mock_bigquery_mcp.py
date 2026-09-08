@@ -15,24 +15,15 @@
 """Local stand-in for the `bigquery-mcp` stdio server.
 
 Serves the catering menu from ``data/catering/catering_menu.json`` out of an
-in-memory SQLite database, so the scheduling agent works without a real BigQuery
+in-memory SQLite database, so catering or scheduling agents work without a real BigQuery
 dataset. Without it you get ``404 Not found: Dataset <project>:catering`` unless
-``scripts/04-cater-agent-bq-seed.sh`` has been run, and the agent quietly invents menu items.
+``scripts/04-cater-agent-bq-seed.sh`` has been run.
 
 Drop-in: it exposes the same three tools the real server does (``run_query``,
 ``list_tables_in_dataset``, ``get_table``) and accepts -- and ignores -- the
 ``--project/--location/--datasets`` flags the agent passes.
 
-    export BIGQUERY_MCP_COMMAND="$PWD/agents/sched_agent/scripts/mock-bigquery-mcp"
-
-The menu table is attached under the ``catering`` schema, so the BigQuery-style
-``SELECT * FROM catering.menu_items`` the agent writes resolves unchanged.
-
-Fidelity limits: SQLite is not BigQuery. Standard SELECT/WHERE/ORDER BY/LIMIT and
-aggregates work; BigQuery-specific functions (UNNEST, VECTOR_SEARCH, ML.*, STRUCT
-literals) do not. Repeated fields (``meal_types``, ``ingredients``, ``allergens``,
-``dietary_labels``) are stored as JSON text rather than ARRAYs, so they are
-searchable with LIKE but not UNNEST.
+    export BIGQUERY_MCP_COMMAND="$PWD/utils/mock-bigquery-mcp/mock-bigquery-mcp"
 """
 
 from __future__ import annotations
@@ -48,9 +39,9 @@ from fastmcp import FastMCP
 
 DATASET = "catering"
 TABLE = "menu_items"
-# app/ -> sched_agent/ -> agents/ -> repo root
+# utils/mock-bigquery-mcp/ -> utils/ -> repo root
 MENU_PATH = (
-    Path(__file__).resolve().parents[3] / "data" / "catering" / "catering_menu.json"
+    Path(__file__).resolve().parents[2] / "data" / "catering" / "catering_menu.json"
 )
 # Stored as JSON text; SQLite has no ARRAY type.
 _REPEATED = ("meal_types", "ingredients", "allergens", "dietary_labels")

@@ -9,7 +9,7 @@ source .env
 PROJECT_NUMBER=$(gcloud projects describe "$GOOGLE_CLOUD_PROJECT_ID" --format="value(projectNumber)")
 TOKEN=$(gcloud auth print-access-token)
 
-# 2. Delete Agent Runtime engines (luncher-agent, strat-agent, sched-agent, cater-agent)
+# 2. Delete Agent Runtime engines (luncher-agent, cater-agent; and strat-agent / sched-agent if previously deployed)
 API="https://${GOOGLE_CLOUD_LOCATION}-aiplatform.googleapis.com/v1/projects/${GOOGLE_CLOUD_PROJECT_ID}/locations/${GOOGLE_CLOUD_LOCATION}/reasoningEngines"
 
 for NAME in luncher-agent strat-agent sched-agent cater-agent; do

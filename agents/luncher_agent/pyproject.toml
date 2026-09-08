@@ -24,6 +24,8 @@ dependencies = [
     "pytest>=8.0.0",
     "gcsfs>=2024.11.0",
     "opentelemetry-resourcedetector-gcp<=1.12.0a0",
+    "pypdf",
+    "google-cloud-storage",
 ]
 
 [[tool.uv.index]]

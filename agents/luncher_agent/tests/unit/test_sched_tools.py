@@ -3,7 +3,7 @@ import asyncio
 import pytest
 
 from app import bookings
-from app.tools import (
+from app.sched_tools import (
     get_team_members,
     book_meeting,
     get_bookings,

@@ -3,12 +3,24 @@ import json
 
 from . import bookings
 
-# Resolve DATA_DIR cleanly for local, container, or package execution
-_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DATA_DIR = os.getenv("DATA_DIR", os.path.join(_CURRENT_DIR, "data"))
 
-MEMBERS_FILE = os.path.join(DATA_DIR, "team_members.json")
+def _resolve_members_file() -> str:
+    data_dir = os.getenv("DATA_DIR")
+    if data_dir:
+        candidate = os.path.join(data_dir, "team_members.json")
+        if os.path.exists(candidate):
+            return candidate
+
+    # repo root: app -> luncher_agent -> agents -> repo root
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(_APP_DIR)))
+    root_candidate = os.path.join(repo_root, "data", "team_members.json")
+    if os.path.exists(root_candidate):
+        return root_candidate
+
+    local_candidate = os.path.join(_APP_DIR, "data", "team_members.json")
+    return local_candidate
 
 
 def get_team_members() -> list[dict]:
@@ -16,14 +28,16 @@ def get_team_members() -> list[dict]:
 
     This lists each member's timezone and weekly availability slots.
     """
-    print("[Scheduling Agent] Fetching team members profiles...")
+    print("[Scheduling Subagent] Fetching team members profiles...")
+    members_file = _resolve_members_file()
     try:
-        if os.path.exists(MEMBERS_FILE):
-            with open(MEMBERS_FILE, "r") as f:
+        if os.path.exists(members_file):
+            with open(members_file, "r") as f:
                 return json.load(f)
+        print(f"[Scheduling Subagent] Warning: Members file not found at {members_file}")
         return []
     except Exception as e:
-        print(f"[Scheduling Agent] Error reading {MEMBERS_FILE}: {e}")
+        print(f"[Scheduling Subagent] Error reading {members_file}: {e}")
         return []
 
 
@@ -34,7 +48,7 @@ async def book_meeting(time_slot: str, reason: str = "") -> str:
         time_slot: The day and time range of the confirmed meeting, e.g., "Monday 10:00-11:00".
         reason: Optional brief reason/summary for selecting this choice.
     """
-    print(f"[Scheduling Agent] Finalizing booking: {time_slot}...")
+    print(f"[Scheduling Subagent] Finalizing booking: {time_slot}...")
     try:
         booking = await bookings.add_booking(time_slot, reason)
         return (
@@ -51,7 +65,7 @@ async def get_bookings() -> str:
     Bookings are shared across the whole team, so this returns the same list
     regardless of who asks. Use it to avoid double-booking a slot.
     """
-    print("[Scheduling Agent] Fetching existing team bookings...")
+    print("[Scheduling Subagent] Fetching existing team bookings...")
     try:
         existing = await bookings.list_bookings()
         if not existing:
@@ -75,37 +89,30 @@ async def cancel_booking(booking_id: str) -> str:
             e.g. "bk_1786830033". Call `get_bookings` first if the user named a
             day rather than an id -- cancelling the wrong meeting is not undoable.
     """
-    print(f"[Scheduling Agent] Cancelling booking {booking_id}...")
+    print(f"[Scheduling Subagent] Cancelling booking {booking_id}...")
     try:
         if await bookings.delete_booking(booking_id):
-            return f"Cancelled booking {booking_id}. Its time slot is free again."
-        return f"No booking {booking_id} exists. Call get_bookings for the current list."
+            return f"Successfully cancelled booking {booking_id}. The slot is free again."
+        return f"Booking {booking_id} not found. Use 'get_bookings' to check existing IDs."
     except Exception as e:
         return f"Failed to cancel booking: {str(e)}"
 
 
 async def cancel_all_bookings(expected_count: int) -> str:
-    """Cancels every booking the team has, clearing the shared calendar.
-
-    This affects everyone, not just the person asking, and cannot be undone. Call
-    `get_bookings` immediately before, tell the user how many will go, and only
-    proceed once they confirm.
+    """Cancels every meeting booked by the team, but only if the count matches.
 
     Args:
-        expected_count: How many bookings `get_bookings` just returned. The
-            cancellation is refused if the collection no longer holds exactly
-            that many, which catches a stale count and a guessed one alike.
+        expected_count: Number of bookings currently on the calendar.
+            Must match the count from `get_bookings` exactly.
     """
-    print(f"[Scheduling Agent] Clearing all bookings (expecting {expected_count})...")
+    print(f"[Scheduling Subagent] Cancelling all {expected_count} team bookings...")
     try:
         deleted = await bookings.delete_all_bookings(expected_count)
         if deleted < 0:
             return (
-                f"Refused: the team does not have exactly {expected_count} bookings. "
-                "Call get_bookings again and retry with the number it reports."
+                "Calendar was modified since you checked it -- no bookings were "
+                "cancelled. Call 'get_bookings' to see what changed and confirm again."
             )
-        if deleted == 0:
-            return "There were no bookings to cancel."
-        return f"Cancelled all {deleted} bookings. Every slot is free again."
+        return f"Successfully cleared the team calendar ({deleted} bookings removed)."
     except Exception as e:
-        return f"Failed to cancel bookings: {str(e)}"
+        return f"Failed to clear bookings: {str(e)}"

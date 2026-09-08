@@ -100,9 +100,9 @@ Interact with the deployed orchestrator in the Gemini Enterprise web interface.
    Plan a team lunch meeting for next week that aligns with our corporate strategy.
    ```
 4. **Verify multi-agent execution:**
-   - The orchestrator concurrently queries `strat_agent`, `sched_agent`, and `cater_agent` via A2A.
+   - The orchestrator executes its in-process subagents (`strategy_agent` and `scheduling_agent`) and concurrently queries `cater_agent` via A2A.
    - It synthesizes and renders the formatted Markdown proposal with strategic rationale, team member availability, ranked time slots, and catering menu options.
-5. **Multi-turn confirmation:** Reply with `"Book Tuesday 12:00 with Menu 1"` to test delegation to `sched_agent` and booking creation in the Memory Bank.
+5. **Multi-turn confirmation:** Reply with `"Book Tuesday 12:00 with Menu 1"` to test delegation to `scheduling_agent` and booking creation in the Memory Bank.
 
 ---
 
@@ -218,7 +218,7 @@ In the **Hub project's** Cloud Console:
 
 ## Also Worth Inspecting
 
-- **Sub-agents in Agent Platform:** Open **Console > Agent Platform > Agents > Deployments**, then select `strat-agent`, `sched-agent`, or `cater-agent`. Use the **Playground** tab to prompt an individual sub-agent directly to isolate backend issues.
+- **Sub-agents in Agent Platform:** Open **Console > Agent Platform > Agents > Deployments**, then select `cater-agent` (or `luncher-agent`). Use the **Playground** tab to prompt an individual agent directly to isolate backend issues.
 - **Project Telemetry & Logs:** Open **Console > Logging > Log Explorer** and **Cloud Trace** to inspect end-to-end execution traces, spans, and payload attributes across orchestrator and sub-agent turns.
 
 ---

@@ -14,9 +14,10 @@
 
 """Sub-agent servers for the integration tests.
 
-The orchestrator resolves the strategy and scheduling agents over A2A, so both
-have to be serving before any test runs -- including the in-process ones in
+The orchestrator resolves the scheduling agent over A2A, so it has to be
+serving before any test runs -- including the in-process ones in
 test_agent.py, which never touch the orchestrator's own HTTP server.
+(The strategy agent runs in-process as an internal subagent).
 """
 
 import logging
@@ -42,8 +43,8 @@ os.environ.pop("GOOGLE_CLOUD_AGENT_ENGINE_ID", None)
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 AGENTS_DIR = os.path.dirname(AGENT_DIR)
 
-# The card path carries the ADK App name, which is "app" for both sub-agents.
-SUB_AGENTS = (("strat_agent", 8081), ("sched_agent", 8082))
+# Sub-agents tuple: empty now that strategy_agent and scheduling_agent are internal subagents.
+SUB_AGENTS: tuple[tuple[str, int], ...] = ()
 
 
 def sub_agent_card_url(port: int) -> str:
@@ -109,10 +110,10 @@ def sub_agent_env(agent: str) -> dict[str, str]:
     env = os.environ.copy()
     # Bookings would otherwise be written to the deployed agent's Memory Bank.
     env.pop("GOOGLE_CLOUD_AGENT_ENGINE_ID", None)
-    if agent == "sched_agent":
+    if agent == "cater_agent":
         env.setdefault(
             "BIGQUERY_MCP_COMMAND",
-            os.path.join(AGENTS_DIR, agent, "scripts", "mock-bigquery-mcp"),
+            os.path.join(AGENTS_DIR, "..", "utils", "mock-bigquery-mcp", "mock-bigquery-mcp"),
         )
     return env
 

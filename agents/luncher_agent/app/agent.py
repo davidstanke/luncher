@@ -39,6 +39,8 @@ from .proposal_builder import (
     ROLE_DESCRIPTION as SYNTHESIZER_INSTRUCTION,
     format_lunch_proposal_tool,
 )
+from .strategy_agent import strategy_agent
+from .scheduling_agent import scheduling_agent
 
 # Defaults to Python's own unset level. LOG_LEVEL=INFO adds the per-event A2A
 # author lines, which show whether a turn was filtered. An unknown level raises
@@ -107,21 +109,13 @@ def discover_sub_agent(
 
     Checks:
     1. Agent Runtime unique IDs: {AGENT_NAME}_ENGINE_ID, {AGENT_NAME}_RUNTIME_ID,
-       and common aliases (e.g. STRATEGY_AGENT_ENGINE_ID, STRAT_AGENT_ENGINE_ID).
+       and common aliases (e.g. CATERING_AGENT_ENGINE_ID, CATER_AGENT_ENGINE_ID).
     2. Direct URL env vars: {AGENT_NAME}_URL, {AGENT_NAME}_AGENT_URL.
     3. Falls back to default_local_url for local offline development.
     """
     name_upper = agent_name.upper()
     stem = name_upper.replace("_AGENT", "")
     stems = [stem]
-    if stem.startswith("STRAT") and "STRAT" not in stems:
-        stems.append("STRAT")
-    if stem.startswith("STRAT") and "STRATEGY" not in stems:
-        stems.append("STRATEGY")
-    if stem.startswith("SCHED") and "SCHED" not in stems:
-        stems.append("SCHED")
-    if stem.startswith("SCHED") and "SCHEDULING" not in stems:
-        stems.append("SCHEDULING")
     if stem.startswith("CATER") and "CATER" not in stems:
         stems.append("CATER")
     if stem.startswith("CATER") and "CATERING" not in stems:
@@ -206,23 +200,7 @@ def discover_sub_agent(
     )
 
 
-# Discover sub-agents (Strategy Agent and Scheduling Agent)
-strategy_agent = discover_sub_agent(
-    agent_name="strategy_agent",
-    default_local_url="http://localhost:8081/a2a/app/.well-known/agent-card.json",
-    description=(
-        "Analyzes GeniCo corporate strategy and product initiative roadmaps (e.g. OmniChef, "
-        "VisionSphere, PowerGrid Home). Consult this agent for strategic context and launch schedules."
-    ),
-)
-
-scheduling_agent = discover_sub_agent(
-    agent_name="scheduling_agent",
-    default_local_url="http://localhost:8082/a2a/app/.well-known/agent-card.json",
-    description=(
-        "Helps coordinate meeting times and availability across team members interactively."
-    ),
-)
+# scheduling_agent is imported as an in-process subagent from .scheduling_agent
 
 default_retry_policy = HttpRetryOptions(
     attempts=5,

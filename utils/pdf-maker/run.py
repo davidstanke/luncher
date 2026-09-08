@@ -141,7 +141,7 @@ Examples:
         print("✅ Step 2 complete!\n")
         
     print("======================================================================")
-    print("🎉 Done! All generated PDFs are stored in 'agents/strat_agent/data/docs/'.")
+    print("🎉 Done! All generated PDFs are stored in 'data/docs/'.")
     print("======================================================================")
 
 if __name__ == "__main__":

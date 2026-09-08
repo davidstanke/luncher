@@ -42,11 +42,15 @@ flowchart TD
 
     subgraph RuntimeLayer ["3. Vertex AI Agent Runtime (Reasoning Engines)"]
         direction TB
-        Orchestrator["👑 Luncher Orchestrator<br/><code>luncher_agent</code><br/><i>Identity: AGENT_IDENTITY</i>"]
+        subgraph OrchestratorGroup ["👑 Luncher Orchestrator (luncher_agent)"]
+            Orchestrator["Orchestrator Core<br/><i>Identity: AGENT_IDENTITY</i>"]
+            Strat["🎯 Strategy Subagent<br/><code>strategy_agent</code> (in-process)"]
+            Sched["📅 Scheduling Subagent<br/><code>scheduling_agent</code> (in-process)"]
+            Orchestrator --- Strat
+            Orchestrator --- Sched
+        end
         
-        subgraph SubAgents ["Specialized Domain Agents (A2A)"]
-            Strat["🎯 Strategy Agent<br/><code>strat_agent</code>"]
-            Sched["📅 Schedule Agent<br/><code>sched_agent</code>"]
+        subgraph SubAgents ["Remote Domain Agents (A2A)"]
             Cater["🍽️ Catering Agent<br/><code>cater_agent</code>"]
         end
     end
@@ -226,8 +230,6 @@ gcloud alpha agent-registry agents list \
   ```text
   DISPLAY_NAME   NAME
   luncher-agent  projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-8fe7-7a42fc94c942
-  strat-agent    projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-3100-6da2806d9100
-  sched-agent    projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-e072-514e7642dacf
   cater-agent    projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-7fe8-45524f0d3a5e
   ```
 
@@ -251,7 +253,7 @@ gcloud alpha agent-registry agents list \
    ```text
    Lets do earliest on tuesday
    ```
-4. **Expected Result**: `luncher_agent` orchestrates with `strat_agent`, `sched_agent`, and `cater_agent`, returning a verified meeting booking (e.g. `bk_1788160039_b8ff36` for Tuesday 10:00–11:00).
+4. **Expected Result**: `luncher_agent` orchestrates with its internal subagents (`strategy_agent` and `scheduling_agent`) and remote `cater_agent`, returning a verified meeting booking (e.g. `bk_1788160039_b8ff36` for Tuesday 10:00–11:00).
 
 ---
 

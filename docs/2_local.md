@@ -1,7 +1,7 @@
 # Running and testing Luncher locally
 
 ### 1. Run the agent servers
-Enter the following prompt in Antigravity to run all of the agents locally, on ports 8080-8082:
+Enter the following prompt in Antigravity to run the agents locally on port 8080:
 
 ```
 run all the agents locally

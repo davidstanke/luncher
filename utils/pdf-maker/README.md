@@ -51,4 +51,4 @@ The generation is split into two steps: creating a manifest blueprint of 15 docu
   ./run.py --force-new-manifest
   ```
 
-Generated PDFs are saved inside `agents/strat_agent/data/docs/`.
+Generated PDFs are saved inside `data/docs/`.

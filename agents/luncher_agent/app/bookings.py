@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Immutable per memory: changing either value orphans every existing booking.
 TEAM_SCOPE: dict[str, str] = {
-    "app_name": "sched_agent",
+    "app_name": os.getenv("BOOKINGS_APP_NAME", "sched_agent"),
     "user_id": "team",
 }
 

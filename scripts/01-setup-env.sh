@@ -94,9 +94,9 @@ export GOOGLE_API_USE_CLIENT_CERTIFICATE="false"
 export GOOGLE_API_USE_MTLS_ENDPOINT="never"
 
 # Optional:
-# export BIGQUERY_MCP_COMMAND="${PWD}/agents/sched_agent/scripts/mock-bigquery-mcp"
+# export BIGQUERY_MCP_COMMAND="${PWD}/utils/mock-bigquery-mcp/mock-bigquery-mcp"
 
-# Runtime wiring (STRATEGY_AGENT_URL, SCHEDULING_AGENT_URL, APP_URL,
+# Runtime wiring (CATERING_AGENT_URL, APP_URL,
 # GOOGLE_CLOUD_AGENT_ENGINE_ID) is passed by \`agents-cli deploy\`, not set here.
 # See .env.example.
 EOF

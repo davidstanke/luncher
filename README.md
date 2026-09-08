@@ -2,11 +2,11 @@
 
 Luncher is an enterprise multi-agent application built on the **Google Agent Development Kit (ADK) v2** and **Agent-to-Agent (A2A) protocol**.
 
-It coordinates strategy-aligned team lunch meetings by orchestrating specialized sub-agents:
-- 👑 **Luncher Orchestrator** (`luncher_agent`): The primary user-facing frontend agent that delegates tasks to the Strategy and Scheduling agents and synthesizes cohesive recommendations.
-- 🎯 **Strategy Agent** (`strat_agent`): Analyzes corporate strategy documents and product launch roadmaps.
-- 📅 **Scheduling Agent** (`sched_agent`): Coordinates team member availability, calendars, and bookings.
-- 🥪 [UNIMPLEMENTED] **Catering Agent** (`cater_agent`): Connects to catering menu service to suggest food for meetings.
+It coordinates strategy-aligned team lunch meetings by orchestrating specialized capabilities:
+- 👑 **Luncher Orchestrator** (`luncher_agent`): The primary user-facing frontend agent that coordinates tasks with sub-agents and synthesizes cohesive recommendations.
+  - 🎯 **Strategy Subagent** (`strategy_agent`): In-process subagent that analyzes corporate strategy documents and product launch roadmaps.
+  - 📅 **Scheduling Subagent** (`scheduling_agent`): In-process subagent that evaluates team member availability, calendars, and bookings.
+- 🥪 [UNIMPLEMENTED] **Catering Agent** (`cater_agent`): Remote A2A peer connecting to catering menu service to suggest food for meetings.
 ---
 
 ## 💻 Reading This Guide in VS Code
@@ -34,7 +34,7 @@ and Linux).
 
 The orchestrator executes an ADK 2.0+ `Workflow` graph:
 - **Intent Router**: Classifies the prompt into planning vs booking intents.
-- **Planning Path (Parallel Gathering & Synthesis)**: Concurrently dispatches requests to remote A2A peers `strategy_agent` and `scheduling_agent`, joins their outputs via `JoinNode`, and passes the combined context to `lunch_synthesizer` to deterministically format the structured Markdown proposal.
+- **Planning Path (Parallel Gathering & Synthesis)**: Concurrently dispatches requests to in-process subagents `strategy_agent` and `scheduling_agent`, joins their outputs via `JoinNode`, and passes the combined context to `lunch_synthesizer` to deterministically format the structured Markdown proposal.
 - **Booking Path (Direct Delegation)**: Routes selection/confirmation turns directly to `booking_handler` which delegates booking execution to `scheduling_agent`.
 
 ```mermaid
@@ -43,42 +43,27 @@ graph TD
 
     subgraph LuncherWorkflow ["👑 Luncher Orchestrator (ADK 2.0 Workflow)"]
         Router["intent_router<br/>(Gemini Intent Classifier)"]
+        StratSubagent["🎯 Strategy Subagent<br/><code>strategy_agent</code><br/>• inspect_strategy_documents()"]
+        SchedSubagent["📅 Scheduling Subagent<br/><code>scheduling_agent</code><br/>• get_team_members()<br/>• book_meeting()<br/>• get_bookings()<br/>• cancel_booking()"]
         JoinGatherer["join_info_gatherer (JoinNode)"]
         Synthesizer["lunch_synthesizer<br/>format_lunch_proposal → Markdown"]
         BookingHandler["booking_handler<br/>(Booking Delegation)"]
 
-        Router -->|Route: plan| StratA2A
-        Router -->|Route: plan| SchedA2A
+        Router -->|Route: plan| StratSubagent
+        Router -->|Route: plan| SchedSubagent
         Router -->|Route: book| BookingHandler
-        BookingHandler -->|Delegate| SchedA2A
+        BookingHandler -->|Delegate| SchedSubagent
+        StratSubagent -->|Strategic Context| JoinGatherer
+        SchedSubagent -->|Availability & Bookings| JoinGatherer
     end
 
-    subgraph StrategyAgent ["🎯 Strategy Agent (Agent Runtime)"]
-        StratA2A["A2A Endpoint / App"]
-        StratLLM["Gemini Model"]
-        StratTools["🛠️ Tools:<br/>• inspect_strategy_documents()"]
-        StratA2A --> StratLLM
-        StratLLM --> StratTools
-    end
+    GCS[("🗄️ Cloud Storage / data/docs/<br/>gs://$PROJECT_ID-strategy-docs/")]
+    MemBank[("🧠 Memory Bank / In-Process")]
+    TeamData[("👥 data/team_members.json")]
 
-    subgraph SchedAgent ["📅 Scheduling Agent (Agent Runtime)"]
-        SchedA2A["A2A FastAPI Endpoint"]
-        SchedLLM["Gemini Model"]
-        SchedTools["🛠️ Tools:<br/>• get_team_members()<br/>• book_meeting()<br/>• get_bookings()<br/>• cancel_booking()"]
-        SchedA2A --> SchedLLM
-        SchedLLM --> SchedTools
-    end
-
-    GCS[("🗄️ Cloud Storage<br/>gs://$PROJECT_ID-strategy-docs/")]
-    BQ[("📊 BigQuery via MCP<br/>catering.menu_items")]
-    MemBank[("🧠 Memory Bank")]
-
-    StratTools -->|PDF Document Read| GCS
-    SchedTools -->|Catering & Menu Query| BQ
-    SchedTools -->|Team bookings<br/>scope: sched_agent / team| MemBank
-
-    StratA2A -->|Strategic Context| JoinGatherer
-    SchedA2A -->|Availability & Bookings| JoinGatherer
+    StratSubagent -->|PDF Document Read| GCS
+    SchedSubagent -->|Team Roster Read| TeamData
+    SchedSubagent -->|Team bookings| MemBank
 
     JoinGatherer -->|Combined Context Handoff| Synthesizer
     Synthesizer -->|Structured Markdown Proposal| User

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Launcher for the local BigQuery stand-in (see mock_bigquery_mcp.py).
+# Point BIGQUERY_MCP_COMMAND at this to run without a real BigQuery dataset:
+#   export BIGQUERY_MCP_COMMAND="$PWD/utils/mock-bigquery-mcp/mock-bigquery-mcp"
+set -euo pipefail
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec uv run --with fastmcp python "$DIR/mock_bigquery_mcp.py" "$@"

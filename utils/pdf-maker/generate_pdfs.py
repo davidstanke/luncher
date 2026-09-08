@@ -616,8 +616,8 @@ def compile_corpus():
         print(f"Error: {e}")
         sys.exit(1)
         
-    # Create final docs folder inside agents/strat_agent/data/docs
-    output_docs_dir = ROOT_DIR / "agents" / "strat_agent" / "data" / "docs"
+    # Create final docs folder inside data/docs
+    output_docs_dir = ROOT_DIR / "data" / "docs"
     output_docs_dir.mkdir(parents=True, exist_ok=True)
     
     styles = create_custom_styles()
@@ -738,7 +738,7 @@ def compile_corpus():
             
             doc_template.build(story, canvasmaker=canvas_class)
             doc_duration = time.time() - doc_start
-            print(f"📄 [Success] Compiled {idx:02d}/{len(documents)}: agents/strat_agent/data/docs/{doc['filename']} in {doc_duration:.2f}s")
+            print(f"📄 [Success] Compiled {idx:02d}/{len(documents)}: data/docs/{doc['filename']} in {doc_duration:.2f}s")
 
     total_duration = time.time() - start_time
     print(f"\n🎉 PDF Corpus Compilation Complete! All documents compiled in {total_duration:.2f} seconds.")

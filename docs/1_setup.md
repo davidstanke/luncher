@@ -39,12 +39,11 @@ Run the following shell scripts in order from the repository root.
 * **Optional Variables** (not prompted for):
   | Variable | Description | Example |
   | :--- | :--- | :--- |
-  | `BIGQUERY_MCP_COMMAND` | BigQuery MCP server command used by `sched_agent` | `"$PWD/agents/sched_agent/scripts/mock-bigquery-mcp"` |
-  | `STRATEGY_DOCS_BUCKET` | GCS bucket holding the strategy PDFs read by `strat_agent` | `"your-gcp-project-id-strategy-docs"` |
+  | `BIGQUERY_MCP_COMMAND` | BigQuery MCP server command for local/offline mock | `"$PWD/utils/mock-bigquery-mcp/mock-bigquery-mcp"` |
+  | `STRATEGY_DOCS_BUCKET` | GCS bucket holding the strategy PDFs read by the strategy subagent in `luncher_agent` | `"your-gcp-project-id-strategy-docs"` |
   | `LOG_LEVEL` | Verbosity of the orchestrator's own logs. `INFO` adds a line per A2A event naming the agent that authored it and whether it was withheld | `"WARNING"` |
-  | `STRATEGY_AGENT_URL` | Agent card URL of `strat_agent`, used by the orchestrator over A2A | resolved at deploy time |
-  | `SCHEDULING_AGENT_URL` | Agent card URL of `sched_agent`, used by the orchestrator over A2A | resolved at deploy time |
-  | `GOOGLE_CLOUD_AGENT_ENGINE_ID` | Engine holding **this** agent's sessions (and Memory Bank for `sched_agent`). Injected on Agent Runtime; must be set explicitly on Cloud Run | resolved at deploy time |
+  | `CATERING_AGENT_URL` | Agent card URL of `cater_agent`, used by the orchestrator over A2A | resolved at deploy time |
+  | `GOOGLE_CLOUD_AGENT_ENGINE_ID` | Engine holding **this** agent's sessions and Memory Bank. Injected on Agent Runtime; must be set explicitly on Cloud Run | resolved at deploy time |
 
 ---
 
@@ -62,7 +61,7 @@ Run the following shell scripts in order from the repository root.
   | `artifactregistry.googleapis.com` | Container image storage repository |
   | `cloudbuild.googleapis.com` | Cloud Build automated container image compilation |
   | `compute.googleapis.com` | Provides the default compute service account Cloud Run runs as |
-  | `bigquery.googleapis.com` | The `catering` dataset queried over MCP by `sched_agent` |
+  | `bigquery.googleapis.com` | The `catering` dataset queried over MCP by `cater_agent` |
   | `apphub.googleapis.com` | Backs the Dashboard tab on an Agent Platform deployment |
   | `discoveryengine.googleapis.com` | Gemini Enterprise Discovery Engine & agent publishing |
   | `iam.googleapis.com` | Identity and Access Management service |

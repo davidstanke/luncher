@@ -1,41 +1,28 @@
 # 🛰️ Luncher Orchestrator Agent
 
-The centralized Orchestrator Agent (the cognitive frontend) for the Luncher platform. It coordinates with both `strat_agent` (Strategy Agent) and `sched_agent` (Scheduling Agent) using the Google Agent Development Kit (ADK) and the Agent-to-Agent (A2A) protocol.
+The centralized Orchestrator Agent (the cognitive frontend) for the Luncher platform. It embeds both `strategy_agent` (Strategy Subagent) and `scheduling_agent` (Scheduling Subagent) as internal in-process subagents, and coordinates with `cater_agent` using the Google Agent Development Kit (ADK) and the Agent-to-Agent (A2A) protocol.
 
 ---
 
 ## 🏗️ Architecture
 
-The Orchestrator acts as the "cognitive frontend" or user gateway, delegating specialized sub-tasks to the backend agents:
-1. **`strat_agent`**: Queried via A2A to extract current corporate strategic goals (e.g., launching *OmniChef* or strategic business constraints).
-2. **`sched_agent`**: Queried via A2A to perform team schedule checks and manage meeting bookings.
+The Orchestrator acts as the "cognitive frontend" or user gateway, coordinating specialized sub-tasks:
+1. **`strategy_agent`**: In-process subagent that analyzes corporate strategy documents (from `data/docs/` or GCS bucket `STRATEGY_DOCS_BUCKET`) and extracts strategic goals and active initiatives.
+2. **`scheduling_agent`**: In-process subagent that evaluates team members' weekly availability (from `data/team_members.json`), checks existing bookings, and records/cancels bookings in the Memory Bank (or in-process calendar).
+3. **`cater_agent`** *(extensible)*: Queried via A2A to recommend catering options from BigQuery menus.
 
 ---
 
 ## ☁️ Deployment Target
 
-`luncher_agent` deploys to **Agent Runtime** (`deployment_target: agent_runtime`). It coordinates
-with sub-agents over the A2A protocol and serves reasoning engine routes, A2A endpoints, and the
-agent card. See the root `README.md` and `docs/deploy.md` for the deployment sequence.
+`luncher_agent` deploys to **Agent Runtime** (`deployment_target: agent_runtime`). It serves reasoning engine routes, A2A endpoints, and the agent card. See the root `README.md` and `docs/3_deploy.md` for the deployment sequence.
 
 ---
 
 ## 🚀 Local Development & Execution
 
-Start each agent in its own terminal, from the repository root. Every `main.py`
-defaults to the port shown, so no `PORT` override is needed.
+Start the orchestrator agent from the repository root. `main.py` defaults to port 8080:
 
-### 1. Start Strategy Agent (port 8081)
-```bash
-uv --directory agents/strat_agent run main.py
-```
-
-### 2. Start Scheduling Agent (port 8082)
-```bash
-uv --directory agents/sched_agent run main.py
-```
-
-### 3. Start Orchestrator Agent (port 8080)
 ```bash
 uv --directory agents/luncher_agent run main.py
 ```
