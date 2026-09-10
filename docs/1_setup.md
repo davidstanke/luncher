@@ -41,8 +41,7 @@ Run the following shell scripts in order from the repository root.
   | :--- | :--- | :--- |
   | `BIGQUERY_MCP_COMMAND` | BigQuery MCP server command for local/offline mock | `"$PWD/utils/mock-bigquery-mcp/mock-bigquery-mcp"` |
   | `STRATEGY_DOCS_BUCKET` | GCS bucket holding the strategy PDFs read by the strategy subagent in `luncher_agent` | `"your-gcp-project-id-strategy-docs"` |
-  | `LOG_LEVEL` | Verbosity of the orchestrator's own logs. `INFO` adds a line per A2A event naming the agent that authored it and whether it was withheld | `"WARNING"` |
-  | `CATERING_AGENT_URL` | Agent card URL of `cater_agent`, used by the orchestrator over A2A | resolved at deploy time |
+  | `LOG_LEVEL` | Verbosity of the orchestrator's own logs. | `"WARNING"` |
   | `GOOGLE_CLOUD_AGENT_ENGINE_ID` | Engine holding **this** agent's sessions and Memory Bank. Injected on Agent Runtime; must be set explicitly on Cloud Run | resolved at deploy time |
 
 ---
@@ -61,7 +60,7 @@ Run the following shell scripts in order from the repository root.
   | `artifactregistry.googleapis.com` | Container image storage repository |
   | `cloudbuild.googleapis.com` | Cloud Build automated container image compilation |
   | `compute.googleapis.com` | Provides the default compute service account Cloud Run runs as |
-  | `bigquery.googleapis.com` | The `catering` dataset queried over MCP by `cater_agent` |
+  | `bigquery.googleapis.com` | The `catering` dataset queried over MCP by `catering_agent` |
   | `apphub.googleapis.com` | Backs the Dashboard tab on an Agent Platform deployment |
   | `discoveryengine.googleapis.com` | Gemini Enterprise Discovery Engine & agent publishing |
   | `iam.googleapis.com` | Identity and Access Management service |
@@ -91,7 +90,7 @@ Run the following shell scripts in order from the repository root.
   - **`roles/storage.admin`** (*Storage Admin*): Access strategy document PDFs and GCS log artifacts.
   - **`roles/artifactregistry.admin`** (*Artifact Registry Admin*): Pull container images for Cloud Run.
   - **`roles/logging.logWriter`** (*Logs Writer*): Write agent trace logs and telemetry to Cloud Logging.
-  - **`roles/run.invoker`** (*Cloud Run Invoker*): Allows Cloud Run agent instances to invoke peer A2A Cloud Run services.
+  - **`roles/run.invoker`** (*Cloud Run Invoker*): Allows Cloud Run agent instances to invoke peer Cloud Run services.
   - **`roles/bigquery.admin`** (*BigQuery Admin*): Query and manage BigQuery datasets from Cloud Run.
   - **`roles/aiplatform.user`** (*Agent Platform User*): Manage sessions on the orchestrator's Agent Engine.
 
@@ -105,7 +104,7 @@ Run the following shell scripts in order from the repository root.
 
   ##### 5. Agent Identity Principal Set (Agent Runtime Identity & Workload Federation)
   `principalSet://agents.global.org-${ORG_ID}.system.id.goog/attribute.platformContainer/aiplatform/projects/${PROJECT_NUMBER}`
-  - **`roles/aiplatform.user`** (*Agent Platform User*): Enables inter-agent A2A communication and session access between Agent Runtime instances.
+  - **`roles/aiplatform.user`** (*Agent Platform User*): Enables session access and model execution on Agent Runtime.
   - **`roles/serviceusage.serviceUsageConsumer`** (*Service Usage Consumer*): Allows agents deployed with `--agent-identity` to consume GCP APIs.
   - **`roles/storage.objectViewer`** (*Storage Object Viewer*): Read access to strategy PDFs and other artifacts in Cloud Storage.
   - **`roles/bigquery.admin`** (*BigQuery Admin*): Query and manage BigQuery datasets via MCP when running on Agent Runtime.

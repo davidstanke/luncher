@@ -43,7 +43,7 @@ def attach_reasoning_engine_routes(app: FastAPI) -> None:
             from ..agent import app as adk_app
 
             # Reuse the process-wide services so sessions created here are
-            # visible to the adk_api and A2A paths, and vice versa (see services.py).
+            # visible to the adk_api path, and vice versa (see services.py).
             runtime = AdkApp(
                 app=adk_app,
                 session_service_builder=services.get_session_service,

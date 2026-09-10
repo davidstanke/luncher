@@ -10,7 +10,7 @@ run all the agents locally
 ### 2. Test the orchestrator agent
 Test the orchestrator agent (which will also invoke the other agents):
 
-- visit http://localhost:8080/dev-ui/?app=app
+- visit http://localhost:8080/dev-ui/?app=luncher_agent
 - enter a prompt like `Schedule a lunch meeting for Monday`
 
 ---

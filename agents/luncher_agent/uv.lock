@@ -26,13 +26,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/dd/d5/51f4ee1bf3b736add42a542d3c8a3fd3fa85f3d36c17972127defc46c26f/a2a_sdk-0.3.26-py3-none-any.whl", hash = "sha256:754e0573f6d33b225c1d8d51f640efa69cbbed7bdfb06ce9c3540ea9f58d4a91", size = 151016, upload-time = "2026-04-09T15:21:12.35Z" },
 ]
 
-[package.optional-dependencies]
-http-server = [
-    { name = "fastapi" },
-    { name = "sse-starlette" },
-    { name = "starlette" },
-]
-
 [[package]]
 name = "absl-py"
 version = "2.5.0"
@@ -605,9 +598,6 @@ wheels = [
 ]
 
 [package.optional-dependencies]
-a2a = [
-    { name = "a2a-sdk" },
-]
 eval = [
     { name = "gepa" },
     { name = "google-cloud-aiplatform", extra = ["evaluation"] },
@@ -1573,11 +1563,10 @@ name = "luncher-agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "a2a-sdk", extra = ["http-server"] },
     { name = "aiohttp" },
     { name = "anyio" },
     { name = "gcsfs" },
-    { name = "google-adk", extra = ["a2a", "eval", "gcp", "otel-gcp"] },
+    { name = "google-adk", extra = ["eval", "gcp", "otel-gcp"] },
     { name = "google-cloud-agentidentitycredentials" },
     { name = "google-cloud-aiplatform", extra = ["agent-engines", "evaluation"] },
     { name = "google-cloud-iamconnectorcredentials" },
@@ -1603,11 +1592,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "a2a-sdk", extras = ["http-server"], specifier = ">=0.3.26,<1.0.0" },
     { name = "aiohttp", specifier = ">=3.13.4" },
     { name = "anyio" },
     { name = "gcsfs", specifier = ">=2024.11.0" },
-    { name = "google-adk", extras = ["a2a", "eval", "gcp", "otel-gcp"], specifier = ">=2.5.0,<3.0.0" },
+    { name = "google-adk", extras = ["eval", "gcp", "otel-gcp"], specifier = ">=2.5.0,<3.0.0" },
     { name = "google-cloud-agentidentitycredentials", specifier = ">=0.1.0" },
     { name = "google-cloud-aiplatform", extras = ["agent-engines", "evaluation"], specifier = ">=1.156.0" },
     { name = "google-cloud-iamconnectorcredentials", specifier = ">=0.1.1" },

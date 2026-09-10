@@ -1,12 +1,12 @@
 # 🍽️ Luncher: Multi-Agent Orchestration Engine
 
-Luncher is an enterprise multi-agent application built on the **Google Agent Development Kit (ADK) v2** and **Agent-to-Agent (A2A) protocol**.
+Luncher is an enterprise multi-agent application built on the **Google Agent Development Kit (ADK) v2**.
 
 It coordinates strategy-aligned team lunch meetings by orchestrating specialized capabilities:
 - 👑 **Luncher Orchestrator** (`luncher_agent`): The primary user-facing frontend agent that coordinates tasks with sub-agents and synthesizes cohesive recommendations.
   - 🎯 **Strategy Subagent** (`strategy_agent`): In-process subagent that analyzes corporate strategy documents and product launch roadmaps.
   - 📅 **Scheduling Subagent** (`scheduling_agent`): In-process subagent that evaluates team member availability, calendars, and bookings.
-- 🥪 [UNIMPLEMENTED] **Catering Agent** (`cater_agent`): Remote A2A peer connecting to catering menu service to suggest food for meetings.
+- 🥪 [UNIMPLEMENTED] **Catering Subagent** (`catering_agent`): In-process subagent student exercise connecting to catering menu service via BigQuery MCP to suggest food for meetings.
 ---
 
 ## 💻 Reading This Guide in VS Code
@@ -82,8 +82,8 @@ See: [Local testing](docs/2_local.md)
 ### 3. ☁️ Deploying to Cloud & Agent Platform Playground
 See: [Deploying to Cloud](docs/3_deploy.md)
 
-### 4. 🥪 Extending Luncher with a catering agent
-See: [Adding the catering agent](docs/4_cater_agent.md)
+### 4. 🥪 Extending Luncher with a catering subagent
+See: [Adding the catering subagent](docs/4_cater_agent.md)
 
 ### 5. ✨ Registering to Gemini Enterprise
 See: [Registering to Gemini Enterprise](docs/5_ge.md)

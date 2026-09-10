@@ -46,26 +46,23 @@ flowchart TD
             Orchestrator["Orchestrator Core<br/><i>Identity: AGENT_IDENTITY</i>"]
             Strat["🎯 Strategy Subagent<br/><code>strategy_agent</code> (in-process)"]
             Sched["📅 Scheduling Subagent<br/><code>scheduling_agent</code> (in-process)"]
+            Cater["🥪 Catering Subagent<br/><code>catering_agent</code> (in-process)"]
             Orchestrator --- Strat
             Orchestrator --- Sched
-        end
-        
-        subgraph SubAgents ["Remote Domain Agents (A2A)"]
-            Cater["🍽️ Catering Agent<br/><code>cater_agent</code>"]
+            Orchestrator --- Cater
         end
     end
 
     subgraph BackendLayer ["4. Backend Platform & Enterprise Data"]
         BQ[("📊 BigQuery<br/>OmniChef Menus & Orders")]
-        VertexAI["⚡ Vertex AI<br/>Gemini 2.5 Models"]
+        VertexAI["⚡ Vertex AI<br/>Gemini Models"]
         Trace["📡 Cloud Trace & Observability"]
     end
 
     User -->|1. User Prompt| GE
     GE -->|2. Outbound Dispatch via defaultEgressAgentGateway| AGW
     AGW -->|3. Sanitized & Authorized Execution| Orchestrator
-    Orchestrator <-->|4. A2A Protocol Invocations| SubAgents
-    Cater -->|SQL Queries| BQ
+    Cater -->|SQL Queries via MCP| BQ
     Orchestrator -->|Reasoning & Embeddings| VertexAI
     RuntimeLayer -. "Telemetry & Spans" .-> Trace
 ```
@@ -95,7 +92,7 @@ flowchart TD
    - **Region**: `${GOOGLE_CLOUD_LOCATION}` (e.g. `us-central1`)
    - **Governed Access Path**: `AGENT_TO_ANYWHERE`
    - **Attached Registries**: `//agentregistry.googleapis.com/projects/${GOOGLE_CLOUD_PROJECT_ID}/locations/${GOOGLE_CLOUD_LOCATION}`
-   - **Protocols**: `MCP`, `A2A`
+   - **Protocols**: `MCP`
 3. Click **Create**.
 
 ---
@@ -230,12 +227,11 @@ gcloud alpha agent-registry agents list \
   ```text
   DISPLAY_NAME   NAME
   luncher-agent  projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-8fe7-7a42fc94c942
-  cater-agent    projects/prj-hyrule-hub/locations/us-central1/agents/agentregistry-00000000-0000-0000-7fe8-45524f0d3a5e
   ```
 
 > [!TIP]
 > **When is Manual Registration Needed?**
-> Manual service registration in Agent Registry is only required if you are registering external third-party MCP servers, custom REST tools hosted outside Google Cloud, or custom non-standard A2A endpoints.
+> Manual service registration in Agent Registry is only required if you are registering external third-party MCP servers or custom REST tools hosted outside Google Cloud.
 
 
 ---
@@ -249,11 +245,8 @@ gcloud alpha agent-registry agents list \
    ```text
    Plan an executive strategy lunch for next Tuesday for the team.
    ```
-3. When the proposal is returned, select a slot:
-   ```text
-   Lets do earliest on tuesday
-   ```
-4. **Expected Result**: `luncher_agent` orchestrates with its internal subagents (`strategy_agent` and `scheduling_agent`) and remote `cater_agent`, returning a verified meeting booking (e.g. `bk_1788160039_b8ff36` for Tuesday 10:00–11:00).
+3. Observe the thinking process in the response container.
+4. **Expected Result**: `luncher_agent` orchestrates with its internal subagents (`strategy_agent` and `scheduling_agent`, and optionally `catering_agent`), returning a verified meeting booking (e.g. `bk_1788160039_b8ff36` for Tuesday 10:00–11:00).
 
 ---
 

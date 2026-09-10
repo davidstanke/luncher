@@ -96,8 +96,8 @@ export GOOGLE_API_USE_MTLS_ENDPOINT="never"
 # Optional:
 # export BIGQUERY_MCP_COMMAND="${PWD}/utils/mock-bigquery-mcp/mock-bigquery-mcp"
 
-# Runtime wiring (CATERING_AGENT_URL, APP_URL,
-# GOOGLE_CLOUD_AGENT_ENGINE_ID) is passed by \`agents-cli deploy\`, not set here.
+# Runtime wiring (STRATEGY_DOCS_BUCKET, GOOGLE_CLOUD_AGENT_ENGINE_ID)
+# is passed by `agents-cli deploy`, not set here.
 # See .env.example.
 EOF
 

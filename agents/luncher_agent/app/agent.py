@@ -17,7 +17,6 @@ import os
 from typing import Any, Literal
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-import httpx
 from google import genai
 from google.genai import types
 from google.genai.types import (
@@ -28,13 +27,11 @@ from google.genai.types import (
 
 from google.adk.agents import Agent
 from google.adk.agents.context import Context
-from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from google.adk.apps.app import App
 from google.adk.events.event import Event
 from google.adk.models.google_llm import Gemini
 from google.adk.workflow import JoinNode, Workflow, node
 
-from .app_utils.genai_transport import GenaiApiTransport
 from .proposal_builder import (
     ROLE_DESCRIPTION as SYNTHESIZER_INSTRUCTION,
     format_lunch_proposal_tool,
@@ -42,9 +39,6 @@ from .proposal_builder import (
 from .strategy_agent import strategy_agent
 from .scheduling_agent import scheduling_agent
 
-# Defaults to Python's own unset level. LOG_LEVEL=INFO adds the per-event A2A
-# author lines, which show whether a turn was filtered. An unknown level raises
-# here rather than quietly falling back.
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "WARNING").upper())
 logger = logging.getLogger(__name__)
 
@@ -62,145 +56,6 @@ MODEL = os.getenv("GOOGLE_GENAI_MODEL", "gemini-3.6-flash")
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
 logger.info("Using Gemini model '%s' in location '%s'", MODEL, MODEL_LOCATION)
-
-
-def format_agent_runtime_url(
-    engine_id_or_resource: str,
-    project_id: str | None = None,
-    location: str | None = None,
-    app_name: str = "app",
-) -> str:
-    """Constructs the A2A agent card URL from an Agent Runtime / Reasoning Engine unique ID."""
-    clean_id = engine_id_or_resource.strip()
-    if clean_id.startswith("projects/"):
-        parts = clean_id.split("/")
-        loc = parts[3] if len(parts) > 3 else (location or "us-central1")
-        resource_path = clean_id
-    else:
-        proj = (
-            project_id
-            or os.getenv("GOOGLE_CLOUD_PROJECT_ID")
-            or os.getenv("GOOGLE_CLOUD_PROJECT")
-        )
-        env_loc = (
-            location
-            or os.getenv("GOOGLE_CLOUD_AGENT_ENGINE_LOCATION")
-            or os.getenv("GOOGLE_CLOUD_REGION")
-            or os.getenv("REGION")
-            or os.getenv("GOOGLE_CLOUD_LOCATION")
-        )
-        if not env_loc or env_loc == "global":
-            env_loc = "us-central1"
-        loc = env_loc
-        resource_path = f"projects/{proj}/locations/{loc}/reasoningEngines/{clean_id}"
-    return (
-        f"https://{loc}-aiplatform.googleapis.com/reasoningEngines/v1/"
-        f"{resource_path}/api/a2a/{app_name}/.well-known/agent-card.json"
-    )
-
-
-def discover_sub_agent(
-    agent_name: str,
-    default_local_url: str,
-    description: str,
-    app_name: str = "app",
-) -> RemoteA2aAgent:
-    """Instantiates a RemoteA2aAgent using Agent Runtime Engine ID, URL, or local fallback.
-
-    Checks:
-    1. Agent Runtime unique IDs: {AGENT_NAME}_ENGINE_ID, {AGENT_NAME}_RUNTIME_ID,
-       and common aliases (e.g. CATERING_AGENT_ENGINE_ID, CATER_AGENT_ENGINE_ID).
-    2. Direct URL env vars: {AGENT_NAME}_URL, {AGENT_NAME}_AGENT_URL.
-    3. Falls back to default_local_url for local offline development.
-    """
-    name_upper = agent_name.upper()
-    stem = name_upper.replace("_AGENT", "")
-    stems = [stem]
-    if stem.startswith("CATER") and "CATER" not in stems:
-        stems.append("CATER")
-    if stem.startswith("CATER") and "CATERING" not in stems:
-        stems.append("CATERING")
-
-    engine_id_vars = []
-    for s in stems:
-        for suffix in ("_AGENT_ENGINE_ID", "_AGENT_RUNTIME_ID", "_ENGINE_ID", "_RUNTIME_ID"):
-            var = f"{s}{suffix}"
-            if var not in engine_id_vars:
-                engine_id_vars.append(var)
-
-    engine_id = None
-    engine_var_used = None
-    for var in engine_id_vars:
-        val = os.getenv(var)
-        if val:
-            engine_id = val
-            engine_var_used = var
-            break
-
-    if engine_id:
-        agent_url = format_agent_runtime_url(engine_id, app_name=app_name)
-        logger.info(
-            "Connecting '%s' via %s (%s): %s",
-            agent_name,
-            engine_var_used,
-            engine_id,
-            agent_url,
-        )
-    else:
-        url_vars = []
-        for s in stems:
-            for suffix in ("_AGENT_URL", "_URL"):
-                var = f"{s}{suffix}"
-                if var not in url_vars:
-                    url_vars.append(var)
-
-        explicit_url = None
-        url_var_used = None
-        for var in url_vars:
-            val = os.getenv(var)
-            if val:
-                explicit_url = val
-                url_var_used = var
-                break
-
-        agent_url = explicit_url or default_local_url
-        if os.getenv("GOOGLE_CLOUD_AGENT_ENGINE_ID") and not explicit_url:
-            logger.warning(
-                "Running in Agent Runtime cloud container, but no Engine ID or URL configured for '%s'. "
-                "Defaulting to %s, which may not be reachable.",
-                agent_name,
-                agent_url,
-            )
-        logger.info(
-            "Connecting '%s' via %s: %s",
-            agent_name,
-            url_var_used if explicit_url else f"default ({engine_id_vars[0]} unset)",
-            agent_url,
-        )
-
-    if "aiplatform.googleapis.com" in agent_url:
-        # An Agent Runtime peer. Its endpoint rejects a bearer header built from
-        # ADC under Agent Identity, so the request goes through the genai
-        # client's transport instead -- see app_utils.genai_transport.
-        client = httpx.AsyncClient(
-            transport=GenaiApiTransport.from_url(agent_url), timeout=120.0
-        )
-        logger.info("  '%s' authenticates via GenaiApiTransport", agent_name)
-    else:
-        # Local development unauthenticated client
-        client = httpx.AsyncClient(timeout=120.0)
-        logger.info("  '%s' uses local unauthenticated transport", agent_name)
-
-    return RemoteA2aAgent(
-        name=agent_name,
-        description=description,
-        agent_card=agent_url,
-        httpx_client=client,
-        timeout=120.0,
-    )
-
-
-# scheduling_agent is imported as an in-process subagent from .scheduling_agent
 
 default_retry_policy = HttpRetryOptions(
     attempts=5,

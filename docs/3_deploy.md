@@ -4,24 +4,24 @@ Once tested locally, deploy your agents to **Gemini Enterprise Agent Platform (G
 
 ## Multi-Agent Agent Descriptions
 
-The system coordinates specialized capabilities to plan strategy-aligned team lunches. `strategy_agent` and `scheduling_agent` operate directly as in-process subagents within `luncher_agent`, while `cater_agent` will collaborate over the **Agent-to-Agent (A2A)** protocol:
+The system coordinates specialized capabilities to plan strategy-aligned team lunches. `strategy_agent` and `scheduling_agent` operate directly as in-process subagents within `luncher_agent`, with `catering_agent` to be added as an in-process subagent in the next chapter:
 
 | Agent | Directory / Name | Role & Description | Deployment Target | Connecting Tools / Subagents |
 | :--- | :--- | :--- | :--- | :--- |
-| 👑 **Luncher Orchestrator** | `luncher_agent` | **Primary Workflow Coordinator**: Orchestrates end-to-end lunch planning across sub-agents in a 2-stage pipeline (parallel gathering then synthesis). | **Agent Runtime** (`agents-cli deploy` with `--agent-identity`) | • **Internal Subagents**: `strategy_agent` (reads PDFs from GCS bucket `gs://${STRATEGY_DOCS_BUCKET}` or local `data/docs/`), `scheduling_agent` (evaluates team availability and records team bookings in Memory Bank)<br>• **A2A Subagent**: `cater_agent` (upcoming)<br>• **Internal Agent**: `lunch_synthesizer`<br>• **Tools**: `format_lunch_proposal_tool` |
-| 🥪 **Catering Agent** *(Upcoming)* | `cater_agent` | **Catering & Dietary Coordinator**: Suggests balanced, themed lunch menus and records/filters team dietary preferences. *(To be built from scratch).* | **Agent Runtime** (`agents-cli deploy` with `--agent-identity`) | • **Tools**: `fetch_catering_data` (BigQuery `catering.menu_items` via MCP `execute_sql`), dietary preference memory tools<br>• **Storage**: Reasoning Engine Memory Bank (dietary preferences)<br>• **Subagent of**: `luncher_agent` |
+| 👑 **Luncher Orchestrator** | `luncher_agent` | **Primary Workflow Coordinator**: Orchestrates end-to-end lunch planning across sub-agents in a 2-stage pipeline (parallel gathering then synthesis). | **Agent Runtime** (`agents-cli deploy` with `--agent-identity`) | • **Internal Subagents**: `strategy_agent` (reads PDFs from GCS bucket `gs://${STRATEGY_DOCS_BUCKET}` or local `data/docs/`), `scheduling_agent` (evaluates team availability and records team bookings in Memory Bank)<br>• **Student Extension**: `catering_agent` (upcoming)<br>• **Internal Agent**: `lunch_synthesizer`<br>• **Tools**: `format_lunch_proposal_tool` |
+| 🥪 **Catering Subagent** *(Upcoming)* | `catering_agent` | **Catering & Dietary Coordinator**: Suggests balanced, themed lunch menus and records/filters team dietary preferences. *(To be built from scratch as an in-process subagent).* | **Agent Runtime** (packaged within `luncher_agent`) | • **Tools**: `fetch_catering_data` (BigQuery `catering.menu_items` via MCP `execute_sql`), dietary preference memory tools<br>• **Storage**: Reasoning Engine Memory Bank (dietary preferences)<br>• **Subagent of**: `luncher_agent` |
 
 > **NOTE**
 >
-> **Catering Agent Development:** We will come back to the Catering Agent (`cater_agent`) and build it up from scratch in a dedicated implementation phase (see [Adding the catering agent](cater_agent.md)).
+> **Catering Subagent Development:** We will come back to the Catering Subagent (`catering_agent`) and build it up from scratch in a dedicated implementation phase (see [Adding the catering subagent](4_cater_agent.md)).
 
 > **NOTE**
 >
 > Why agents deploy to Agent Runtime:
 >
 > - **Injected Memory Bank Engine:** `luncher_agent` stores team bookings in Memory Bank (`reasoningEngines/<ENGINE_ID>`). Agent Runtime automatically injects `GOOGLE_CLOUD_AGENT_ENGINE_ID`, so the host *is* the memory host without needing separate engine infrastructure.
-> - **Agent Identity (`--agent-identity`):** Deploys agents with Workload Identity Federation. Cross-agent A2A requests authenticate securely via `GenaiApiTransport` (through `vertexai.Client()._api_client.request()`) rather than unbound bearer tokens, while granting runtime permissions to GCP resources (GCS, BigQuery, and Reasoning Engines) via the project's Principal Set.
-> - **Orchestrator Hosting:** `luncher_agent` deploys directly to Agent Runtime, serving both ADK reasoning engine routes and A2A endpoints seamlessly.
+> - **Agent Identity (`--agent-identity`):** Deploys agents with Workload Identity Federation, granting runtime permissions to GCP resources (GCS, BigQuery, and Reasoning Engines) via the project's Principal Set.
+> - **Orchestrator Hosting:** `luncher_agent` deploys directly to Agent Runtime, serving both ADK reasoning engine routes and dev UI seamlessly.
 
 ---
 
@@ -94,9 +94,9 @@ Test the orchestrator agent:
 
 > **NOTE**
 >
-> We will come back to `cater_agent` and build it up from scratch following [`cater_agent.md`](cater_agent.md).
+> We will come back to `catering_agent` and build it up from scratch following [`4_cater_agent.md`](4_cater_agent.md).
 
 ---
 
-| [⬅️ Previous: 2. Local Testing](2_local.md) | [📚 Getting Started](../README.md#getting-started) | [Next: 4. Extending Luncher with a catering agent ➡️](4_cater_agent.md) |
+| [⬅️ Previous: 2. Local Testing](2_local.md) | [📚 Getting Started](../README.md#getting-started) | [Next: 4. Extending Luncher with a catering subagent ➡️](4_cater_agent.md) |
 | :--- | :---: | ---: |

@@ -5,8 +5,7 @@ description = "Centralized Luncher Multi-Agent Orchestrator"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
 dependencies = [
-    "google-adk[a2a,eval,gcp,otel-gcp]>=2.5.0,<3.0.0",
-    "a2a-sdk[http-server]>=0.3.26,<1.0.0",
+    "google-adk[eval,gcp,otel-gcp]>=2.5.0,<3.0.0",
     "uvicorn",
     "watchfiles",
     "python-dotenv",

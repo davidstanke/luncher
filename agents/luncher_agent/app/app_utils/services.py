@@ -14,7 +14,7 @@
 
 """Process-wide ADK session/artifact services shared by every surface.
 
-Registered under ``shared://`` so the ADK web routes, the A2A path, and the
+Registered under ``shared://`` so the ADK web routes and the
 reasoning_engine adapter share one instance: a session created on any surface
 is visible to the others.
 """

@@ -82,7 +82,7 @@ Publishing registers the agent with the app, but user access must be explicitly 
 
 > **NOTE**
 >
-> The console tab may show: *"This agent is not integrated with Agent Registry and Gateway policies will not be applied."* This is standard and expected for an A2A registration.
+> The console tab may show: *"This agent is not integrated with Agent Registry and Gateway policies will not be applied."* This is standard and expected when registering an Agent Runtime Reasoning Engine directly.
 
 ---
 
@@ -100,9 +100,9 @@ Interact with the deployed orchestrator in the Gemini Enterprise web interface.
    Plan a team lunch meeting for next week that aligns with our corporate strategy.
    ```
 4. **Verify multi-agent execution:**
-   - The orchestrator executes its in-process subagents (`strategy_agent` and `scheduling_agent`) and concurrently queries `cater_agent` via A2A.
+   - The orchestrator executes its in-process subagents (`strategy_agent` and `scheduling_agent`, along with `catering_agent` if implemented).
    - It synthesizes and renders the formatted Markdown proposal with strategic rationale, team member availability, ranked time slots, and catering menu options.
-5. **Multi-turn confirmation:** Reply with `"Book Tuesday 12:00 with Menu 1"` to test delegation to `scheduling_agent` and booking creation in the Memory Bank.
+5. **Multi-turn confirmation:** Reply with `"Book Tuesday 12:00"` to test delegation to `scheduling_agent` and booking creation in the Memory Bank.
 
 ---
 
@@ -218,10 +218,10 @@ In the **Hub project's** Cloud Console:
 
 ## Also Worth Inspecting
 
-- **Sub-agents in Agent Platform:** Open **Console > Agent Platform > Agents > Deployments**, then select `cater-agent` (or `luncher-agent`). Use the **Playground** tab to prompt an individual agent directly to isolate backend issues.
+- **Deployed Agent in Agent Platform:** Open **Console > Agent Platform > Agents > Deployments**, then select `luncher-agent`. Use the **Playground** tab to prompt the agent directly to isolate issues.
 - **Project Telemetry & Logs:** Open **Console > Logging > Log Explorer** and **Cloud Trace** to inspect end-to-end execution traces, spans, and payload attributes across orchestrator and sub-agent turns.
 
 ---
 
-| [⬅️ Previous: 4. Extending Luncher with a catering agent](4_cater_agent.md) | [📚 Getting Started](../README.md#getting-started) | [Next: 6. Enterprise Hardening ➡️](6_gateway_registry.md) |
+| [⬅️ Previous: 4. Extending Luncher with a catering subagent](4_cater_agent.md) | [📚 Getting Started](../README.md#getting-started) | [Next: 6. Enterprise Hardening ➡️](6_gateway_registry.md) |
 | :--- | :---: | ---: |

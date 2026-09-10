@@ -6,7 +6,7 @@ base_template: adk
 language: python
 create_params:
   deployment_target: agent_runtime
-  is_a2a: true
+  is_a2a: false
   session_type: in_memory
   cicd_runner: skip
   agent_guidance_filename: GEMINI.md

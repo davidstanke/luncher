@@ -125,7 +125,7 @@ else
   echo "Warning: Could not detect active gcloud user account for local ADC IAM binding."
 fi
 
-# 5. Agent Identity Principal Set (for cross-agent A2A communication, GCS storage access, BigQuery on Agent Runtime)
+# 5. Agent Identity Principal Set (for GCS storage access, BigQuery on Agent Runtime)
 ORG_ID="${ORG_ID:-$(gcloud projects get-ancestors "$GOOGLE_CLOUD_PROJECT_ID" --format="json" 2>/dev/null | python3 -c "import json, sys; print(next((a['id'] for a in json.load(sys.stdin) if a.get('type') == 'organization'), ''))" 2>/dev/null || echo "")}"
 if [ -n "${ORG_ID}" ]; then
   AGENT_PRINCIPAL_SET="principalSet://agents.global.org-${ORG_ID}.system.id.goog/attribute.platformContainer/aiplatform/projects/${PROJECT_NUMBER}"

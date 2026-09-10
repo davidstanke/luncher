@@ -1,6 +1,6 @@
-`catering_menu.json` is newline-delimited JSON that `cater_agent` reads from BigQuery
+`catering_menu.json` is newline-delimited JSON that `catering_agent` reads from BigQuery
 over MCP. Import it as `<project_id>.catering.menu_items` — the table name the agent's
-prompt asks for (`app/agent.py`).
+prompt asks for (`app/catering_agent.py`).
 
 ```bash
 bq --location=US mk --dataset "${GOOGLE_CLOUD_PROJECT_ID}:catering"
@@ -8,12 +8,12 @@ bq load --source_format=NEWLINE_DELIMITED_JSON --autodetect --replace \
   "${GOOGLE_CLOUD_PROJECT_ID}:catering.menu_items" data/catering/catering_menu.json
 ```
 
-`cater_agent` runs `bigquery-mcp` as a local stdio subprocess inside its own container
+`catering_agent` runs `bigquery-mcp` as a local stdio subprocess inside the `luncher_agent` container
 and queries BigQuery directly as its runtime service account, so that account is the only
 identity that needs access:
 
 ```bash
-# Cloud Run / Agent Runtime identity for cater_agent
+# Cloud Run / Agent Runtime identity for luncher_agent
 COMPUTE_SA="$(gcloud projects describe $GOOGLE_CLOUD_PROJECT_ID --format='value(projectNumber)')-compute@developer.gserviceaccount.com"
 
 # Run query jobs
